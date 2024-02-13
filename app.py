@@ -37,6 +37,7 @@ def get_image_list():
       if name.endswith(".cog"):
         name = name[:-4]
       image_list.append(name)
+    image_list.sort(key=str.lower)
   lock.release()
   return image_list
 
@@ -44,8 +45,8 @@ def get_model_list():
   global model_list
   if not model_list:
     model_list = [path.basename(f).replace(".tif", "") for f in glob.glob(f"data/*") if path.isdir(f) and f != "data/raw"]
+    model_list.sort(key=str.lower)
   return model_list
-    
 
 def check_path(name, model=None, feature=None, validation=False):
   # raw image

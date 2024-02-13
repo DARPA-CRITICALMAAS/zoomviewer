@@ -25,7 +25,8 @@
     </select>
     <select id="select_feature" onchange="switch_layer()">
     </select>
-    <input type="checkbox" id="validation" onchange="switch_layer()">validation</input>
+    <input type="range" id="opacity" name="opacity" min="0" max="1" value="0.5" step="0.1" oninput="change_opacity()"/>
+    <input type="checkbox" id="validation" onchange="switch_layer()" oninput="switch_layer()">validation</input>
     <div>Simple demo page to show a default OpenSeadragon viewer.</div>
     <div id="viewer" class="viewer"></div>
     <script type="text/javascript">
@@ -52,8 +53,9 @@
                 for (const [key, val] of Object.entries(data)) {
                     $('#select_feature').append($("<option></option>").attr("value", key).text(val));
                 }
-                show_map();
+                show_layer();
             });
+            viewer.open("/dzi/" + map +".dzi");
         }
 
         function switch_layer() {
@@ -62,14 +64,32 @@
                 p = viewer.viewport.getCenter();
                 z = viewer.viewport.getZoom();
             }      
-            show_map()
+            show_layer()
         }
 
-        function show_map() {
+        function show_layer() {
             var model = $("#select_model")[0].value;
             var map = $("#select_map")[0].value;
             var feature = $("#select_feature")[0].value;
-            viewer.open(["/dzi/" + map +".dzi", "/dzi/" + map + "/" + model + "/" + feature + ".dzi"]);
+            var opacity = $("#opacity")[0].value;
+            if (viewer.world.getItemCount() == 1) {
+                viewer.addTiledImage({
+                    "tileSource": "/dzi/" + map + "/" + model + "/" + feature + ".dzi",
+                    "opacity": opacity
+                })
+            } else {
+                viewer.addTiledImage({
+                    "tileSource": "/dzi/" + map + "/" + model + "/" + feature + ".dzi",
+                    "index": 1,
+                    "replace": true,
+                    "opacity": opacity
+                })
+            }
+        }
+
+        function change_opacity() {
+            var opacity = $("#opacity")[0].value;
+            viewer.world.getItemAt(1).setOpacity(opacity);
         }
 
         viewer.addHandler('open', function() {
