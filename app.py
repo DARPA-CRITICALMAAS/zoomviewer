@@ -19,8 +19,9 @@ model_list = None
 
 img = {
   "name": None,
+  "model": None,
+  "feature": None,
   "raw": None,
-  "validation": None,
   "extracted": None,
   "maxlevel": 0
 }
@@ -48,7 +49,7 @@ def get_model_list():
     model_list.sort(key=str.lower)
   return model_list
 
-def check_path(name, model=None, feature=None, validation=False):
+def check_path(name, model=None, feature=None):
   # raw image
   if not model or not feature:
     fpath = f"data/raw/{name}.tif"
@@ -59,12 +60,11 @@ def check_path(name, model=None, feature=None, validation=False):
       return fpath
     return None
 
-  if validation:  
-    fpath = f"data/{model}/{name}/val_{name}_{feature}.tif"
-    if path.exists(fpath):
-      return fpath
-    return None
-  
+  # validation results
+  fpath = f"data/{model}/{name}/val_{name}_{feature}.tif"
+  if path.exists(fpath):
+    return fpath
+
   # extracted image
   fpath = f"data/{model}/{name}/{name}_{feature}.tif"
   if path.exists(fpath):
@@ -89,23 +89,15 @@ def load_image(name, model=None, feature=None):
     img["raw"] = [None] * img["maxlevel"]
     img["raw"][-1] = image
     img["extracted"] = [None] * img["maxlevel"]
-    img["validation"] = [None] * img["maxlevel"]
   if model and feature:
     if model != img["model"] or feature != img["feature"]:
       img["model"] = model
       img["feature"] = feature
       img["extracted"] = [None] * img["maxlevel"]
-      img["validation"] = [None] * img["maxlevel"]
       fpath = check_path(name, model, feature)
-      print(fpath)
       if fpath:
         image = Image.open(fpath)
         img["extracted"][-1] = image
-      fpath = check_path(name, model, feature, validation=True)
-      print(fpath)
-      if fpath:
-        image = Image.open(fpath)
-        img["validation"][-1] = image
   lock.release()
 
 def send_image(img, transparent=False, quality=70):
