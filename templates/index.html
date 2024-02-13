@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{image}}</title>
+    <script src="/js/openseadragon.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style type="text/css">
+        .viewer {
+            width: 1024px;
+            height: 768px;
+        }
+
+    </style>
+</head>
+<body>
+    <select id="select_model" onchange="switch_map()">
+        {% for model in model_list %}
+        <option>{{model}}</option>
+        {% endfor %}
+    </select>
+    <select id="select_map" onchange="switch_map()">
+        {% for map in image_list %}
+        <option>{{map}}</option>
+        {% endfor %}
+    </select>
+    <select id="select_feature" onchange="switch_layer()">
+    </select>
+    <input type="checkbox" id="validation" onchange="switch_layer()">validation</input>
+    <div>Simple demo page to show a default OpenSeadragon viewer.</div>
+    <div id="viewer" class="viewer"></div>
+    <script type="text/javascript">
+        var p = undefined;
+        var z = undefined;
+
+        var viewer = OpenSeadragon({
+            debugMode: {{debug}},
+            id: "viewer",
+            prefixUrl: "/images/",
+            tileSources: ["/dzi/{{image_list[0]}}.dzi"],
+            showNavigator: true,
+        });
+
+        function switch_map() {
+            // reset old values for zoom/pan
+            p = undefined;
+            z = undefined;
+            // load new map for model
+            var model = $("#select_model")[0].value;
+            var map = $("#select_map")[0].value;
+            $('#select_feature').empty();
+            $.get("results/" + map + "/" + model, function(data) {
+                for (const [key, val] of Object.entries(data)) {
+                    $('#select_feature').append($("<option></option>").attr("value", key).text(val));
+                }
+                show_map();
+            });
+        }
+
+        function switch_layer() {
+            // store old values for zoom/pan
+            if (viewer.viewport !== undefined) {
+                p = viewer.viewport.getCenter();
+                z = viewer.viewport.getZoom();
+            }      
+            show_map()
+        }
+
+        function show_map() {
+            var model = $("#select_model")[0].value;
+            var map = $("#select_map")[0].value;
+            var feature = $("#select_feature")[0].value;
+            viewer.open(["/dzi/" + map +".dzi", "/dzi/" + map + "/" + model + "/" + feature + ".dzi"]);
+        }
+
+        viewer.addHandler('open', function() {
+            if (z !== undefined) {
+                viewer.viewport.zoomTo(z, null, true);
+            }
+            if (p !== undefined) {
+                viewer.viewport.panTo(p, true);
+            }
+            viewer.viewport.applyConstraints();
+        });
+
+        switch_map()
+    </script>
+</body>
+</html>
