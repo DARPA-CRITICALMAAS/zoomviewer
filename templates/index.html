@@ -13,27 +13,26 @@
     </style>
 </head>
 <body>
-    <select id="select_model" onchange="switch_map()">
+    Models: <select id="select_model" onchange="switch_map()">
         {% for model in model_list %}
         <option>{{model}}</option>
         {% endfor %}
     </select>
-    <select id="select_map" onchange="switch_map()">
+    Maps: <select id="select_map" onchange="switch_map()">
         {% for map in image_list %}
         <option>{{map}}</option>
         {% endfor %}
     </select>
-    <select id="select_feature" onchange="switch_layer()">
+    Features: <select id="select_feature" onchange="switch_layer()">
     </select>
-    <input type="range" id="opacity" name="opacity" min="0" max="1" value="0.5" step="0.1" oninput="change_opacity()"/>
-    <div>Simple demo page to show a default OpenSeadragon viewer.</div>
+    Opacity: <input type="range" id="opacity" name="opacity" min="0" max="1" value="0.5" step="0.1" oninput="change_opacity()"/>
     <div id="viewer" class="viewer"></div>
     <script type="text/javascript">
         var p = undefined;
         var z = undefined;
 
         var viewer = OpenSeadragon({
-            debugMode: {{debug}},
+            debugMode: false,
             id: "viewer",
             prefixUrl: "/images/",
             tileSources: ["/dzi/{{image_list[0]}}.dzi"],
